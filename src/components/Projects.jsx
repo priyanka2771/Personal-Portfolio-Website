@@ -30,13 +30,7 @@ const projectsData = [
     live: " https://priya2771.github.io/Calculator/",
     github: "https://github.com/priya2771/Calculator.git",
   },
-  {
-    title: "Calculator",
-    desc: " A simple and responsive calculator built with vanilla JavaScript, featuring real-time calculations and a clean user interface. ",
-    tech: ["HTML", "CSS", "JavaScript"],
-    live: " https://priya2771.github.io/Calculator/",
-    github: "https://github.com/priya2771/Calculator.git",
-  },
+  
   {
     title: "Movie Search App",
     desc: "A responsive movie search application built with React that fetches real-time movie data from the OMDb API. Users can search movies, view posters, release year, and results sorted from newest to oldest.",
