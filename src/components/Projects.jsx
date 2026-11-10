@@ -1,117 +1,140 @@
-import React from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { GITHUB, PROJECTS } from "../data";
+import { Img, PageLabel, RevealText } from "./ui";
 
-const projectsData = [
-  {
-    title: "Portfolio Website",
-    desc: "Personal portfolio built with React and Tailwind CSS.",
-    tech: ["React", "Tailwind"],
-    live: "https://priya2771.github.io/Personal-Portfolio-Website/",
-    github: "https://github.com/priya2771/Personal-Portfolio-Website.git",
-  },
-  {
-    title: "Cake-Shop",
-    desc: " a responsive cake shop website using Tailwind CSS, featuring an elegant UI, product showcase. ",
-    tech: ["Tailwind", "JavaScript"],
-    live: "https://priya2771.github.io/Cake-shop/",
-    github: "https://github.com/priya2771/Cake-shop.git",
-  },
-  {
-    title: "E-Chat-bot",
-    desc: "AI-powered chatbot with a Flask backend providing REST APIs for real-time message handling and dynamic responses.",
-    tech: ["React", "Python", "Flask"],
-    live: "https://priya2771.github.io/chatbot/",
-    github: "https://github.com/priya2771/chatbot.git",
-  },
-  {
-    title: "Calculator",
-    desc: " A simple and responsive calculator built with vanilla JavaScript, featuring real-time calculations and a clean user interface. ",
-    tech: ["HTML", "CSS", "JavaScript"],
-    live: " https://priya2771.github.io/Calculator/",
-    github: "https://github.com/priya2771/Calculator.git",
-  },
-  
-  {
-    title: "Movie Search App",
-    desc: "A responsive movie search application built with React that fetches real-time movie data from the OMDb API. Users can search movies, view posters, release year, and results sorted from newest to oldest.",
-    tech: ["React", "Bootstrap", "OMDb API"],
-    live: "https://priya2771.github.io/Movie-search-app/",
-    github: "https://github.com/priya2771/Movie-search-app",
-  },
-];
+/**
+ * Pinned horizontal gallery: vertical scrolling slides the lookbook sideways.
+ * Section height = viewport + the track's overflow distance, measured live.
+ */
+export default function Projects() {
+  const section = useRef(null);
+  const track = useRef(null);
+  const [dist, setDist] = useState(0);
 
-function Projects() {
+  useEffect(() => {
+    const measure = () => {
+      if (track.current)
+        setDist(Math.max(0, track.current.scrollWidth - window.innerWidth));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(track.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const { scrollYProgress } = useScroll({
+    target: section,
+    offset: ["start start", "end end"],
+  });
+  const x = useTransform(scrollYProgress, [0, 1], [0, -dist]);
+
   return (
     <section
       id="projects"
-      className="relative w-full min-h-screen px-6 py-24 bg-[url('https://images.unsplash.com/photo-1619441207978-3d326c46e2c9?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-fixed bg-center scroll-mt-24"
+      ref={section}
+      style={{ height: `calc(100vh + ${dist}px)` }}
+      className="relative"
     >
-      {/* Background Overlay */}
-      <div className="absolute inset-0 bg-black/50 z-0"></div>
-
-      <div className="relative max-w-6xl mx-auto z-[10]">
-        {/* Heading */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-white">
-            My <span className="text-amber-400">Projects</span>
-          </h2>
-          <p className="mt-4 text-zinc-400 max-w-xl mx-auto">
-            A selection of projects showcasing my frontend skills and
-            experience.
-          </p>
+      <div className="sticky top-0 flex h-screen flex-col overflow-hidden pt-24">
+        <div className="px-5 md:px-10 lg:px-24">
+          <PageLabel page={4} title="The Lookbook" />
         </div>
 
-        {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projectsData.map((proj, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              className="bg-white/5 border border-white/10 rounded-xl p-6 hover:scale-105 transition transform"
+        <motion.div
+          ref={track}
+          style={{ x }}
+          className="flex w-max flex-1 items-start gap-8 pt-8 px-5 pb-20 md:gap-14 md:px-10 lg:px-24"
+        >
+          {/* opening page */}
+          <div className="w-[82vw] shrink-0 md:w-[38vw]">
+            <RevealText
+              text="Selected *work,* styled."
+              className="font-display text-6xl font-semibold leading-[0.95] tracking-tight md:text-8xl"
+            />
+            <p className="mt-6 max-w-sm text-ink/85">
+              A selection of projects showcasing my frontend skills and
+              experience. Keep scrolling — the page turns sideways.
+            </p>
+            <p className="mt-8 text-[13px] uppercase tracking-[0.18em] text-rouge">
+              Scroll →
+            </p>
+          </div>
+
+          {PROJECTS.map((p, i) => (
+            <article
+              key={p.title}
+              className="relative h-[calc(100vh-15rem)] max-h-[74vh] min-h-[340px] w-[78vw] shrink-0 overflow-hidden text-white md:w-[34vw] lg:w-[28vw]"
             >
-              <h3 className="text-xl font-semibold mb-2 text-white">
-                {proj.title}
-              </h3>
-              <p className="text-zinc-400 mb-4">{proj.desc}</p>
-
-              <div className="flex flex-wrap gap-2 mb-4 text-sm">
-                {proj.tech.map((tech, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-1 bg-white/10 rounded text-white"
+              <Img src={p.img} alt={p.title} className="absolute inset-0" />
+              {/* scrim so overlaid text is readable on any photo */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
+              <span className="pointer-events-none absolute left-4 top-2 font-display text-7xl font-extrabold leading-none text-white/90 md:text-8xl">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+                <h3 className="font-display text-3xl font-bold leading-tight md:text-4xl">
+                  {p.title}
+                </h3>
+                <p className="mt-2 line-clamp-2 text-sm text-white/90 md:text-base">
+                  {p.desc}
+                </p>
+                <p className="mt-3 flex flex-wrap gap-2 text-xs uppercase tracking-[0.14em]">
+                  {p.tech.map((t) => (
+                    <span key={t} className="border border-white/60 px-2 py-1">
+                      {t}
+                    </span>
+                  ))}
+                </p>
+                <div className="mt-4 flex gap-6 text-xs font-semibold uppercase tracking-[0.16em]">
+                  <a
+                    href={p.live.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border-b-2 border-rouge pb-0.5 hover:opacity-70"
                   >
-                    {tech}
-                  </span>
-                ))}
+                    Live demo ↗
+                  </a>
+                  <a
+                    href={p.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border-b border-white/70 pb-0.5 hover:opacity-70"
+                  >
+                    GitHub ↗
+                  </a>
+                </div>
               </div>
-
-              <div className="flex gap-4">
-                <a
-                  href={proj.live}
-                  className="text-amber-400 hover:underline text-sm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Live Demo
-                </a>
-                <a
-                  href={proj.github}
-                  className="text-zinc-300 hover:underline text-sm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GitHub
-                </a>
-              </div>
-            </motion.div>
+            </article>
           ))}
+
+          {/* closing page */}
+          <a
+            href={GITHUB}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-cursor="Visit"
+            className="flex h-[calc(100vh-15rem)] max-h-[74vh] min-h-[340px] w-[70vw] shrink-0 flex-col justify-between bg-ink p-8 text-paper md:w-[26vw]"
+          >
+            <span className="text-[13px] uppercase tracking-[0.18em]">End of the lookbook</span>
+            <span className="font-display text-5xl italic leading-none">
+              More on GitHub ↗
+            </span>
+          </a>
+        </motion.div>
+
+        {/* progress rule */}
+        <div className="absolute inset-x-5 bottom-6 h-px bg-ink/20 md:inset-x-10 lg:inset-x-24">
+          <motion.div
+            style={{ scaleX: scrollYProgress }}
+            className="h-full origin-left bg-rouge"
+          />
         </div>
       </div>
     </section>
   );
 }
-
-export default Projects;

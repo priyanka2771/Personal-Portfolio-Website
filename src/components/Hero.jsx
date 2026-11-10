@@ -1,51 +1,125 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { IMG, NAME, PROJECTS, SERVICES } from "../data";
+import { Img } from "./ui";
 
-function Hero() {
+const EASE = [0.76, 0, 0.24, 1];
+
+export default function Hero({ ready }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const mastY = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+  const fade = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
+
   return (
     <section
       id="hero"
-      className="min-h-screen flex items-center justify-center text-center px-4 relative  h-screen w-full bg-[url('https://images.unsplash.com/photo-1729552048052-24a21a7821ef?q=80&w=2070&auto=format&fit=crop')] bg-cover  bg-fixed bg-center"
+      ref={ref}
+      className="relative isolate min-h-screen overflow-hidden bg-black text-white"
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      {ready && (
+        <>
+          {/* full-bleed cover photo, in colour */}
+          <motion.div
+            style={{ y: bgY, scale: bgScale }}
+            className="absolute inset-0 z-0"
+          >
+            <Img
+              src={IMG.cover}
+              alt="Stag silhouette at dusk"
+              pos="30% 50%"
+              className="h-full w-full"
+            />
+          </motion.div>
+          {/* light scrim — keeps the deer visible, text still readable */}
+          <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/35 via-transparent to-black/55" />
 
-      {/* Content */}
-      <div className="relative z-10 flex h-full items-center justify-center px-6">
-        <div className="max-w-3xl text-center text-white">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold  leading-tight">
-            Hi, I’m <span className="text-amber-400">Priyanka</span>
-          </h1>
+          {/* masthead */}
+          <motion.h1
+            style={{ y: mastY }}
+            aria-label={NAME}
+            className="pointer-events-none absolute inset-x-0 top-[8vh] z-10 flex justify-center font-display text-[17vw] font-extrabold uppercase leading-[0.85] tracking-tight"
+          >
+            {NAME.split("").map((ch, i) => (
+              <span key={i} aria-hidden className="inline-block overflow-hidden">
+                <motion.span
+                  className="inline-block"
+                  initial={{ y: "105%" }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 1.1, ease: EASE, delay: 0.1 + i * 0.07 }}
+                >
+                  {ch}
+                </motion.span>
+              </span>
+            ))}
+          </motion.h1>
 
-          <h2 className="mt-4 text-xl md:text-2xl text-zinc-300">
-            Frontend Developer • React • UI Enthusiast
-          </h2>
-
-          <p className="mt-4 text-base sm:text-lg md:text-xl text-zinc-400 max-w-xl mx-auto">
-            I build responsive, user-friendly web interfaces with modern
-            technologies, focusing on clean design and smooth user experience.
-          </p>
-
-          {/* Buttons */}
-          <div className="mt-8 flex justify-center gap-4">
-            <a
-              href="#projects"
-              className="rounded-lg bg-amber-500 px-6 py-3 font-medium text-black hover:bg-amber-400 transition"
+          {/* cover lines */}
+          <motion.div
+            style={{ opacity: fade }}
+            className="absolute right-5 top-[44vh] z-10 flex max-w-[11rem] flex-col items-end gap-6 text-right md:right-10 md:max-w-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.1, duration: 0.9 }}
+              className="max-w-[10rem] md:max-w-sm"
             >
-              View Projects
-            </a>
-
-            <a
-              href="#contact"
-              className="rounded-lg border border-white/40 px-6 py-3 font-medium text-white hover:bg-white/10 transition"
+              <p className="inline-block bg-rouge px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.16em]">
+                The Frontend Issue
+              </p>
+              <p className="mt-3 font-display text-2xl font-semibold leading-snug md:text-4xl">
+                Frontend Developer, <em>obsessed</em> with detail.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.25, duration: 0.9 }}
+              className="hidden max-w-[14rem] text-right sm:block"
             >
-              Contact Me
+              <p className="inline-block bg-rouge px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.16em]">
+                Inside
+              </p>
+              <p className="mt-3 text-base leading-relaxed md:text-lg">
+                React · Tailwind · Motion
+                <br />{PROJECTS.length} projects · {SERVICES.length} services
+              </p>
+            </motion.div>
+          </motion.div>
+
+          {/* bottom bar */}
+          <motion.div
+            style={{ opacity: fade }}
+            className="absolute inset-x-5 bottom-6 z-10 flex items-end justify-between md:inset-x-10"
+          >
+            <div className="text-sm uppercase leading-relaxed tracking-[0.16em]">
+              <p>Issue Nº 01</p>
+              <p>
+                {new Date().toLocaleDateString("en", { month: "long", year: "numeric" })}
+              </p>
+            </div>
+            <a
+              href="#about"
+              data-cursor="Open"
+              className="flex flex-col items-center gap-2 text-sm uppercase tracking-[0.16em]"
+            >
+              Turn the page
+              <motion.span
+                animate={{ y: [0, 8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.6 }}
+                className="block h-8 w-px bg-white"
+              />
             </a>
-          </div>
-        </div>
-      </div>
+            <div className="hidden w-28 sm:block" aria-hidden />
+          </motion.div>
+        </>
+      )}
     </section>
   );
 }
-
-export default Hero;
